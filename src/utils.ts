@@ -1,6 +1,5 @@
 import { Chalk } from 'chalk';
 import * as fs from 'fs';
-import * as micromatch from 'micromatch';
 import * as path from 'path';
 import * as typescript from 'typescript';
 import * as webpack from 'webpack';
@@ -8,107 +7,27 @@ import * as webpack from 'webpack';
 import constants = require('./constants');
 import {
   DependencyGraph,
-  ErrorInfo,
   LoaderOptions,
   ReverseDependencyGraph,
-  Severity,
   TSInstance,
   WebpackError,
   WebpackModule
 } from './interfaces';
 
 /**
- * The default error formatter.
- */
-function defaultErrorFormatter(error: ErrorInfo, colors: Chalk) {
-  const messageColor =
-    error.severity === 'warning' ? colors.bold.yellow : colors.bold.red;
-
-  return (
-    colors.grey('[tsl] ') +
-    messageColor(error.severity.toUpperCase()) +
-    (error.file === ''
-      ? ''
-      : messageColor(' in ') +
-        colors.bold.cyan(`${error.file}(${error.line},${error.character})`)) +
-    constants.EOL +
-    messageColor(`      TS${error.code}: ${error.content}`)
-  );
-}
-
-/**
  * Take TypeScript errors, parse them and format to webpack errors
  * Optionally adds a file name
  */
 export function formatErrors(
-  diagnostics: ReadonlyArray<typescript.Diagnostic> | undefined,
-  loaderOptions: LoaderOptions,
-  colors: Chalk,
-  compiler: typeof typescript,
-  merge: { file?: string; module?: WebpackModule },
-  context: string
+  _diagnostics: ReadonlyArray<typescript.Diagnostic> | undefined,
+  _loaderOptions: LoaderOptions,
+  _colors: Chalk,
+  _compiler: typeof typescript,
+  _merge: { file?: string; module?: WebpackModule },
+  _context: string
 ): WebpackError[] {
-  return diagnostics === undefined
-    ? []
-    : diagnostics
-        .filter(diagnostic => {
-          if (loaderOptions.ignoreDiagnostics.indexOf(diagnostic.code) !== -1) {
-            return false;
-          }
-          if (
-            loaderOptions.reportFiles.length > 0 &&
-            diagnostic.file !== undefined
-          ) {
-            const relativeFileName = path.relative(
-              context,
-              diagnostic.file.fileName
-            );
-            const matchResult = micromatch(
-              [relativeFileName],
-              loaderOptions.reportFiles
-            );
-            if (matchResult.length === 0) {
-              return false;
-            }
-          }
-          return true;
-        })
-        .map<WebpackError>(diagnostic => {
-          const file = diagnostic.file;
-          const position =
-            file === undefined
-              ? undefined
-              : file.getLineAndCharacterOfPosition(diagnostic.start!);
-          const errorInfo: ErrorInfo = {
-            code: diagnostic.code,
-            severity: compiler.DiagnosticCategory[
-              diagnostic.category
-            ].toLowerCase() as Severity,
-            content: compiler.flattenDiagnosticMessageText(
-              diagnostic.messageText,
-              constants.EOL
-            ),
-            file: file === undefined ? '' : path.normalize(file.fileName),
-            line: position === undefined ? 0 : position.line + 1,
-            character: position === undefined ? 0 : position.character + 1,
-            context
-          };
-
-          const message =
-            loaderOptions.errorFormatter === undefined
-              ? defaultErrorFormatter(errorInfo, colors)
-              : loaderOptions.errorFormatter(errorInfo, colors);
-
-          const error = makeError(
-            message,
-            merge.file === undefined ? errorInfo.file : merge.file,
-            position === undefined
-              ? undefined
-              : { line: errorInfo.line, character: errorInfo.character }
-          );
-
-          return Object.assign(error, merge) as WebpackError;
-        });
+  // don't report any errors. typescript errors will be handled by ForkTsCheckerWebpackPlugin
+  return [];
 }
 
 export function readFile(
@@ -134,6 +53,15 @@ export function makeError(
     file,
     loaderSource: 'ts-loader'
   };
+}
+
+export function fileMatchesPatterns(patterns: RegExp[], file: string): boolean {
+  for (const regexp of patterns) {
+    if (file.match(regexp) !== null) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function appendSuffixIfMatch(

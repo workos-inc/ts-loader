@@ -18,7 +18,6 @@ import {
 } from './interfaces';
 import * as logger from './logger';
 import {
-  getSolutionErrors,
   makeServicesHost,
   makeSolutionBuilderHost,
   makeWatchHost
@@ -359,29 +358,13 @@ function getScriptRegexp(instance: TSInstance) {
 
 export function reportTranspileErrors(
   instance: TSInstance,
-  loader: webpack.loader.LoaderContext
+  _loader: webpack.loader.LoaderContext
 ) {
   if (!instance.reportTranspileErrors) {
     return;
   }
   instance.reportTranspileErrors = false;
   // happypack does not have _module.errors - see https://github.com/TypeStrong/ts-loader/issues/336
-  if (!instance.loaderOptions.happyPackMode) {
-    const solutionErrors: WebpackError[] = getSolutionErrors(
-      instance,
-      loader.context
-    );
-    const diagnostics = instance.program!.getOptionsDiagnostics();
-    const errors = formatErrors(
-      diagnostics,
-      instance.loaderOptions,
-      instance.colors,
-      instance.compiler,
-      { file: instance.configFilePath || 'tsconfig.json' },
-      loader.context
-    );
-    loader._module.errors.push(...solutionErrors, ...errors);
-  }
 }
 
 export function buildSolutionReferences(

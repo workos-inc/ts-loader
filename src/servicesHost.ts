@@ -26,7 +26,12 @@ import {
   WebpackError
 } from './interfaces';
 import { makeResolver } from './resolver';
-import { formatErrors, readFile, unorderedRemoveItem } from './utils';
+import {
+  formatErrors,
+  readFile,
+  unorderedRemoveItem,
+  fileMatchesPatterns
+} from './utils';
 
 function readFileWithInstance(
   instance: TSInstance,
@@ -68,6 +73,14 @@ export function makeServicesHost(
     }
   } = instance;
 
+  files.forEach((_value, key) => {
+    if (!fileMatchesPatterns(instance.loaderOptions.emitOnly, key)) {
+      files.delete(key);
+    }
+  });
+
+  // files.forEach((_value, key) => console.log(key));
+
   const newLine =
     compilerOptions.newLine === constants.CarriageReturnLineFeedCode
       ? constants.CarriageReturnLineFeed
@@ -84,6 +97,15 @@ export function makeServicesHost(
   ): string | undefined => readFileWithInstance(instance, filePath, encoding);
 
   const fileExists = (filePathToCheck: string) => {
+    const shouldEmit = fileMatchesPatterns(
+      instance.loaderOptions.emitOnly,
+      filePathToCheck
+    );
+
+    if (!shouldEmit) {
+      return false;
+    }
+
     if (instance.solutionBuilderHost) {
       const outputFile = instance.solutionBuilderHost.getOutputFileFromReferencedProject(
         filePathToCheck

@@ -1,6 +1,6 @@
 {
-  "name": "ts-loader",
-  "version": "7.0.2",
+  "name": "@maxchehab/ts-loader",
+  "version": "0.1.0",
   "description": "TypeScript loader for webpack",
   "main": "index.js",
   "types": "dist",
@@ -42,16 +42,15 @@
   "engines": {
     "node": ">=10.0.0"
   },
-  "author": "John Reilly <johnny_reilly@hotmail.com> (https://blog.johnnyreilly.com)",
+  "author": "Max Chehab <maxchehab@gmail.com>",
   "contributors": [
-    "John Reilly <johnny_reilly@hotmail.com> (https://blog.johnnyreilly.com)",
-    "James Brantly <james@jbrantly.com> (http://www.jbrantly.com/)"
+    "Max Chehab <maxchehab@gmail.com>"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/TypeStrong/ts-loader/issues"
+    "url": "https://github.com/maxchehab/ts-loader/issues"
   },
-  "homepage": "https://github.com/TypeStrong/ts-loader",
+  "homepage": "https://github.com/maxchehab/ts-loader",
   "dependencies": {
     "chalk": "^2.3.0",
     "enhanced-resolve": "^4.0.0",

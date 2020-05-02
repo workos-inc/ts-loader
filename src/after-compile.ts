@@ -19,7 +19,8 @@ import {
   collectAllDependants,
   ensureProgram,
   formatErrors,
-  isUsingProjectReferences
+  isUsingProjectReferences,
+  fileMatchesPatterns
 } from './utils';
 
 export function makeAfterCompile(
@@ -145,6 +146,13 @@ function determineFilesToCheckForErrors(
   instance: TSInstance
 ) {
   const { files, modifiedFiles, filesWithErrors, otherFiles } = instance;
+
+  files.forEach((_value, key) => {
+    if (!fileMatchesPatterns(instance.loaderOptions.emitOnly, key)) {
+      files.delete(key);
+    }
+  });
+
   // calculate array of files to check
   const filesToCheckForErrors: TSFiles = new Map<string, TSFile>();
   if (checkAllFilesForErrors) {
