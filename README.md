@@ -2,7 +2,7 @@
 
 A fork of TypeStrong's [ts-loader](https://github.com/TypeStrong/ts-loader).
 
-Additional feature `emitOnly` which lets you compile typescript while only emiting defentitions for a descrete set of files.
+Additional feature `emitOnly` which lets you compile typescript while only emiting definitions for a discrete set of files.
 
 ## Usage:
 
